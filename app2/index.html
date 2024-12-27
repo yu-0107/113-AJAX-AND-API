@@ -44,15 +44,17 @@ getClasses();
 function getClasses(){
   $.get("./api/get_classes.php",function(classes){
     let data=JSON.parse(classes);
-    $("#classesList").html('');
-    console.log(data);
+    $("#classesList").html(''); 
+   //console.log(data);
     data.forEach(function(item,idx){
       let c=`<li class="nav-item">
               <a class="nav-link" href="javascript:query(${item.classroom})">${item.classroom}</a>
              </li>`
       $("#classesList").append(c);
-        query(data[0].classroom);
     })
+    if($("#students").html()==''){
+      query(data[0].classroom);
+    }
   })
 }
 let CreateModal
@@ -67,6 +69,7 @@ function create(){
 
 //查詢指定班的學生資料的函式
 function query(code){
+  console.log(code)
   $.get("./api/query.php",{code},function(students){
       let data=JSON.parse(students);
       //console.log(data);
@@ -98,19 +101,22 @@ function query(code){
       
       $(".edit").on("click",function(){
         let id=$(this).data("id");
-          getEditForm(id);
+           getEditForm(id);
       })
   })
 }
 
+let EditModal
 //取得編輯資料表單內容
 function getEditForm(id){
   $.get("./edit_form.php",{id},function(html){
     $("#modal").html(html);
-    let EditModal = new bootstrap.Modal('#EditModal');
+    EditModal = new bootstrap.Modal('#EditModal');
     EditModal.show();
   })
 }
+
+
 
 //編輯資料的函式
 function update(){
@@ -118,14 +124,13 @@ function update(){
 }
 
 //刪除資料的函式
-function del(id,btn){
+function del(id,classroom){
   let chk=confirm('確定要刪除嗎？');
   if(chk){
 
-    $.post('./api/delete.php',{id},function(){
+    $.post('./api/delete.php',{id,classroom},function(res){
       //console.log(res);
-      // query(res);
-      $(btn).parents('tr').remove();
+      query(res);
     })
   }
 }
